@@ -5,10 +5,44 @@ import {
   FormControlLabelText,
 } from "@/components/ui/form-control";
 import { Input, InputField } from "@/components/ui/input";
+import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
-import { View } from "react-native";
+import { useAuth } from "@/contexts/AuthContext";
+import { router } from "expo-router";
+import { useEffect, useState } from "react";
+import { Alert, View } from "react-native";
 
 export default function Index() {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const { login, isLoading, error, clearError, isAuthenticated } = useAuth();
+
+  //Redirection automatique si utilisateur déjà loggué
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.replace("/welcome");
+    }
+  }, [isAuthenticated]);
+
+  // Effacer les erreurs quand l'utilisateur tape
+  useEffect(() => {
+    if (error) {
+      clearError();
+    }
+  }, [username, password]);
+
+  const handleLogin = async () => {
+    if (!username.trim() || !password.trim()) {
+      Alert.alert("Erreur", "Veuillez remplir tout les champs");
+      return;
+    }
+    const success = await login(username.trim(), password);
+
+    if (success) {
+      console.log("connexion reussie");
+    }
+  };
+
   return (
     <View
       style={{
@@ -27,7 +61,15 @@ export default function Index() {
             <FormControlLabelText>Entrez votre E-mail</FormControlLabelText>
           </FormControlLabel>
           <Input>
-            <InputField type="text" placeholder="E-mail"></InputField>
+            <InputField
+              type="text"
+              placeholder="E-mail"
+              value={username}
+              onChangeText={setUsername}
+              autoCapitalize="none"
+              autoCorrect={false}
+              keyboardType="email-address"
+            ></InputField>
           </Input>
         </FormControl>
         <FormControl>
@@ -37,10 +79,28 @@ export default function Index() {
             </FormControlLabelText>
           </FormControlLabel>
           <Input>
-            <InputField type="password" placeholder="Mot de passe"></InputField>
+            <InputField
+              type="password"
+              placeholder="Mot de passe"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={true}
+            ></InputField>
           </Input>
         </FormControl>
-        <Button className="w-fit self-end mt-4" size="sm">
+
+        {/* Affichage des erreurs */}
+        {error && (
+          <Text size="sm" className="text-red-500 text-center">
+            {error}
+          </Text>
+        )}
+        <Button
+          className="w-fit self-end mt-4"
+          size="sm"
+          onPress={handleLogin}
+          disabled={isLoading}
+        >
           <ButtonText>Se connecter</ButtonText>
         </Button>
       </VStack>
