@@ -36,14 +36,10 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true, error: null });
 
         try {
-          console.log("Tentative de connexion avec:", { username });
-
           const response = await authAPI.login({ username, password });
-          console.log("Réponse API :", response);
 
           // Décoder le JWT pour extraire les infos utilisateur
           const decodedToken = decodeJWT(response.token);
-          console.log("Token décodé:", decodedToken);
 
           // Créer l'objet user à partir du JWT
           const user: User = {
@@ -52,8 +48,6 @@ export const useAuthStore = create<AuthState>()(
             email: decodedToken?.username || username,
             username: decodedToken?.username || username,
           };
-
-          console.log("User créé:", user);
 
           set({
             user,
@@ -65,7 +59,6 @@ export const useAuthStore = create<AuthState>()(
 
           return true;
         } catch (error: any) {
-          console.log("Erreur complète:", error);
           let errorMessage = "Erreur de connexion";
 
           if (error.response) {
@@ -117,8 +110,8 @@ export const useAuthStore = create<AuthState>()(
 
           return true;
         } catch (error) {
-          console.log("Erreur lors du refresh token:", error);
           set({ user: null, token: null, refreshToken: null });
+          console.log("Erreur lors du refresh token:", error);
           return false;
         }
       },

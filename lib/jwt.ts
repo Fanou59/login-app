@@ -43,6 +43,7 @@ export function isTokenExpired(token: string): boolean {
     const currentTime = Date.now() / 1000;
     return decoded.exp < currentTime;
   } catch (error) {
+    console.log("Erreur lors de la vérification du token:", error);
     return true;
   }
 }
