@@ -1,5 +1,11 @@
-import React, { createContext, useContext, ReactNode, useEffect } from "react";
 import { useAuthStore } from "@/store/authStore";
+import React, {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
 interface AuthContextType {
   user: any;
@@ -7,6 +13,8 @@ interface AuthContextType {
   isLoading: boolean;
   error: string | null;
   isAuthenticated: boolean;
+  isInitialized: boolean;
+
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
   clearError: () => void;
@@ -15,6 +23,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const [isInitialized, setIsInitialized] = useState(false);
   const {
     user,
     token,
@@ -28,7 +37,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Vérifier l'auth au démarrage
   useEffect(() => {
-    checkAuth();
+    const initAuth = async () => {
+      // Petit délai pour s'assurer que le layout est prêt
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      await checkAuth();
+      setIsInitialized(true);
+    };
+
+    initAuth();
   }, [checkAuth]);
 
   const login = async (username: string, password: string) => {
@@ -45,6 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
         error,
         isAuthenticated,
+        isInitialized,
         login,
         logout,
         clearError,

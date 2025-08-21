@@ -15,21 +15,29 @@ import { Alert, View } from "react-native";
 export default function Index() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const { login, isLoading, error, clearError, isAuthenticated } = useAuth();
+  const {
+    login,
+    isLoading,
+    error,
+    clearError,
+    isAuthenticated,
+    isInitialized,
+  } = useAuth();
 
   //Redirection automatique si utilisateur déjà loggué
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isInitialized && isAuthenticated) {
+      console.log("Redirection vers /welcome");
       router.replace("/welcome");
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, isInitialized]);
 
   // Effacer les erreurs quand l'utilisateur tape
   useEffect(() => {
     if (error) {
       clearError();
     }
-  }, [username, password]);
+  }, [username, password, error, clearError]);
 
   const handleLogin = async () => {
     if (!username.trim() || !password.trim()) {
@@ -42,6 +50,15 @@ export default function Index() {
       console.log("connexion reussie");
     }
   };
+
+  // 👈 Ajouter cet écran de chargement
+  if (!isInitialized) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text>Initialisation...</Text>
+      </View>
+    );
+  }
 
   return (
     <View
