@@ -1,18 +1,16 @@
-import { api } from "./api";
 import type {
   LoginRequest,
   LoginResponse,
   RefreshTokenResponse,
   User,
 } from "@/types/auth";
+import { api, createAuthenticatedApi } from "./api";
 
 export const authAPI = {
   login: (credentials: LoginRequest) =>
     api.post("login_check", { json: credentials }).json<LoginResponse>(),
 
-  logout: () => api.post("auth/logout").json(),
-
-  me: () => api.get("auth/me").json<{ user: User }>(),
+  me: (token: string) => createAuthenticatedApi(token).post("me").json<User>(),
 
   // 👈 Nouvel endpoint pour refresh token
   refreshToken: (refreshToken: string) =>

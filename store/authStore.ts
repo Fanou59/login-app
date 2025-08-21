@@ -19,6 +19,7 @@ interface AuthState {
   clearError: () => void;
   checkAuth: () => Promise<void>;
   refreshAccessToken: () => Promise<boolean>;
+  fetchUserProfile: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -38,24 +39,16 @@ export const useAuthStore = create<AuthState>()(
         try {
           const response = await authAPI.login({ username, password });
 
-          // Décoder le JWT pour extraire les infos utilisateur
-          const decodedToken = decodeJWT(response.token);
-
-          // Créer l'objet user à partir du JWT
-          const user: User = {
-            id: decodedToken?.username || username, // Utiliser username comme ID
-            name: decodedToken?.username?.split("@")[0] || "Utilisateur", // Nom à partir de l'email
-            email: decodedToken?.username || username,
-            username: decodedToken?.username || username,
-          };
-
+          // Stocker d'abord le token
           set({
-            user,
             token: response.token,
-            refreshToken: response.refresh_token, // 👈 Utiliser refresh_token avec underscore
+            refreshToken: response.refresh_token,
             isLoading: false,
             error: null,
           });
+
+          const { fetchUserProfile } = get();
+          await fetchUserProfile();
 
           return true;
         } catch (error: any) {
@@ -117,19 +110,14 @@ export const useAuthStore = create<AuthState>()(
       },
 
       // Action de déconnexion
-      logout: async () => {
-        try {
-          await authAPI.logout();
-        } catch (error) {
-          console.log("Erreur lors de la déconnexion:", error);
-        }
-
+      logout: () => {
         set({
           user: null,
           token: null,
           refreshToken: null,
           error: null,
         });
+        console.log("Etat local nettoyé");
       },
 
       // Effacer les erreurs
@@ -137,34 +125,29 @@ export const useAuthStore = create<AuthState>()(
         set({ error: null });
       },
 
-      // Vérifier l'authentification
-      checkAuth: async () => {
+      //Action pour récupérer le profil de l'utilisateur
+      fetchUserProfile: async () => {
         const { token } = get();
-
         if (!token) return;
 
-        // Pour l'instant, on vérifie juste si le token est valide en le décodant
         try {
-          const decodedToken = decodeJWT(token);
-          if (decodedToken && decodedToken.exp > Date.now() / 1000) {
-            // Token valide, recréer l'user
-            const user: User = {
-              id: decodedToken.username,
-              name: decodedToken.username?.split("@")[0] || "Utilisateur",
-              email: decodedToken.username,
-              username: decodedToken.username,
-            };
-            set({ user });
-          } else {
-            // Token expiré
-            set({ user: null, token: null, refreshToken: null });
-          }
+          const response = await authAPI.me(token);
+          set({ user: response });
+          console.log(response);
         } catch (error) {
-          console.log("Token invalide", error);
-          set({ user: null, token: null, refreshToken: null });
+          console.log("Erreur lors de la récupération du profil:", error);
         }
       },
+
+      // Vérifier l'authentification
+      checkAuth: async () => {
+        const { token, fetchUserProfile } = get();
+
+        if (!token) return;
+        await fetchUserProfile();
+      },
     }),
+
     {
       name: "auth-storage",
       storage: createJSONStorage(() => AsyncStorage),
