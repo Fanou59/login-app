@@ -115,7 +115,21 @@ export const useAuthStore = create<AuthState>()(
       },
 
       // Action de déconnexion
-      logout: () => {
+      logout: async () => {
+        const { token } = get(); // 👈 Récupérer les DEUX tokens
+
+        try {
+          if (token) {
+            // 👈 Vérifier qu'on a les deux
+            console.log("Appel API pour invalider le Token");
+            await authAPI.logout(token); // 👈 Passer les deux tokens
+            console.log("Logout API call successful");
+          }
+        } catch (error) {
+          console.log("Logout - erreur", error);
+        }
+
+        // Nettoyage
         set({
           user: null,
           token: null,

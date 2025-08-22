@@ -24,4 +24,7 @@ export const authAPI = {
         json: { refresh_token: refreshToken },
       })
       .json<RefreshTokenResponse>(),
+
+  logout: (token: string) =>
+    createAuthenticatedApi(token).post("logout").json(),
 };
