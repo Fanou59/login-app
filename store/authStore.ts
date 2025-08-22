@@ -20,6 +20,11 @@ interface AuthState {
   checkAuth: () => Promise<void>;
   refreshAccessToken: () => Promise<boolean>;
   fetchUserProfile: () => Promise<void>;
+  registration: (
+    email: string,
+    plainPassword: string,
+    firstname: string
+  ) => Promise<boolean>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -118,6 +123,70 @@ export const useAuthStore = create<AuthState>()(
           error: null,
         });
         console.log("Etat local nettoyé");
+      },
+
+      // Action de registration
+      registration: async (
+        email: string,
+        plainPassword: string,
+        firstname: string
+      ) => {
+        set({ isLoading: true, error: null });
+
+        try {
+          const response = await authAPI.registration({
+            email,
+            plainPassword,
+            firstname,
+          });
+          console.log("Enregistrement réussi - Réponse API : ", response);
+
+          // 👈 NOUVEAU : Connexion automatique après inscription réussie
+          console.log("Registration - Tentative de connexion automatique");
+
+          // Appeler la fonction login avec les mêmes identifiants
+          const { login } = get();
+          const loginSuccess = await login(email, plainPassword);
+
+          if (loginSuccess) {
+            console.log("Registration - Connexion automatique réussie");
+            set({
+              isLoading: false,
+              error: null,
+            });
+            return true;
+          } else {
+            // Si la connexion automatique échoue, on considère quand même l'inscription comme réussie
+            console.log(
+              "Registration - Connexion automatique échouée, mais inscription OK"
+            );
+            set({
+              isLoading: false,
+              error: null,
+            });
+            return true;
+          }
+        } catch (error: any) {
+          let errorMessage = "Erreur d'inscription";
+
+          if (error.response) {
+            const status = error.response.status;
+
+            if (status === 400) {
+              errorMessage = "Données d'inscription invalides";
+            } else if (status === 500) {
+              errorMessage = "Erreur serveur, veuillez réessayer";
+            }
+          }
+
+          set({
+            isLoading: false,
+            error: errorMessage,
+            user: null,
+          });
+
+          return false;
+        }
       },
 
       // Effacer les erreurs

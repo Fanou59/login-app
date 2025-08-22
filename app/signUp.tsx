@@ -4,7 +4,6 @@ import {
   FormControlLabel,
   FormControlLabelText,
 } from "@/components/ui/form-control";
-import { HStack } from "@/components/ui/hstack";
 import { Input, InputField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
@@ -13,47 +12,39 @@ import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert, View } from "react-native";
 
-export default function Index() {
-  const [username, setUsername] = useState("");
+export default function SignUp() {
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const {
-    login,
-    isLoading,
-    error,
-    clearError,
-    isAuthenticated,
-    isInitialized,
-  } = useAuth();
+  const [firstname, setFirstname] = useState("");
 
-  //Redirection automatique si utilisateur déjà loggué
-  useEffect(() => {
-    if (isInitialized && isAuthenticated) {
-      console.log("Redirection vers /welcome");
-      router.replace("/welcome");
-    }
-  }, [isAuthenticated, isInitialized]);
+  const { isLoading, error, clearError, isInitialized, registration } =
+    useAuth();
 
   // Effacer les erreurs quand l'utilisateur tape
   useEffect(() => {
     if (error) {
       clearError();
     }
-  }, [username, password, error, clearError]);
+  }, [email, password, error, clearError]);
 
-  const handleLogin = async () => {
-    if (!username.trim() || !password.trim()) {
+  const handleRegistration = async () => {
+    if (!email.trim() || !password.trim()) {
       Alert.alert("Erreur", "Veuillez remplir tout les champs");
       return;
     }
-    const success = await login(username.trim(), password);
+    const success = await registration(
+      email.trim(),
+      password,
+      firstname.trim()
+    );
 
     if (success) {
-      console.log("connexion reussie");
-    }
-  };
+      console.log("utilisateur enregistré");
 
-  const handleSignUp = () => {
-    router.replace("/signUp");
+      Alert.alert("Succés", "Votre compte est créé", [
+        { text: "OK", onPress: () => router.replace("/") },
+      ]);
+    }
   };
 
   // 👈 Ajouter cet écran de chargement
@@ -86,11 +77,27 @@ export default function Index() {
             <InputField
               type="text"
               placeholder="E-mail"
-              value={username}
-              onChangeText={setUsername}
+              value={email}
+              onChangeText={setEmail}
               autoCapitalize="none"
               autoCorrect={false}
               keyboardType="email-address"
+            ></InputField>
+          </Input>
+        </FormControl>
+        <FormControl>
+          <FormControlLabel>
+            <FormControlLabelText>Entrez votre Prénom</FormControlLabelText>
+          </FormControlLabel>
+          <Input>
+            <InputField
+              type="text"
+              placeholder="Prénom"
+              value={firstname}
+              onChangeText={setFirstname}
+              autoCapitalize="words"
+              autoCorrect={false}
+              keyboardType="default"
             ></InputField>
           </Input>
         </FormControl>
@@ -117,24 +124,14 @@ export default function Index() {
             {error}
           </Text>
         )}
-        <HStack space="md" className="flex justify-end">
-          <Button
-            className="w-fit self-end mt-4"
-            size="sm"
-            onPress={handleLogin}
-            disabled={isLoading}
-          >
-            <ButtonText>Se connecter</ButtonText>
-          </Button>
-          <Button
-            className="w-fit self-end mt-4"
-            size="sm"
-            onPress={handleSignUp}
-            disabled={isLoading}
-          >
-            <ButtonText>S'inscrire</ButtonText>
-          </Button>
-        </HStack>
+        <Button
+          className="w-fit self-end mt-4"
+          size="sm"
+          onPress={handleRegistration}
+          disabled={isLoading}
+        >
+          <ButtonText>Enregistrer</ButtonText>
+        </Button>
       </VStack>
     </View>
   );

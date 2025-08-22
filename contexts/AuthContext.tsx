@@ -18,6 +18,11 @@ interface AuthContextType {
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
   clearError: () => void;
+  registration: (
+    email: string,
+    plainPassword: string,
+    firstname: string
+  ) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -33,6 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     logout,
     clearError,
     checkAuth,
+    registration: storeRegistration,
   } = useAuthStore();
 
   // Vérifier l'auth au démarrage
@@ -51,6 +57,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return await storeLogin(username, password);
   };
 
+  const registration = async (
+    email: string,
+    plainPassword: string,
+    firstname: string
+  ) => {
+    return await storeRegistration(email, plainPassword, firstname);
+  };
+
   const isAuthenticated = !!user && !!token;
 
   return (
@@ -65,6 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         logout,
         clearError,
+        registration,
       }}
     >
       {children}
