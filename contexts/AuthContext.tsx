@@ -23,6 +23,7 @@ interface AuthContextType {
     plainPassword: string,
     firstname: string
   ) => Promise<boolean>;
+  deleteAccount: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -39,6 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     clearError,
     checkAuth,
     registration: storeRegistration,
+    deleteAccount: storeDeleteAccount,
   } = useAuthStore();
 
   // Vérifier l'auth au démarrage
@@ -65,6 +67,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return await storeRegistration(email, plainPassword, firstname);
   };
 
+  const deleteAccount = async () => {
+    return await storeDeleteAccount();
+  };
+
   const isAuthenticated = !!user && !!token;
 
   return (
@@ -80,6 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout,
         clearError,
         registration,
+        deleteAccount,
       }}
     >
       {children}

@@ -17,7 +17,6 @@ export const authAPI = {
   registration: (data: RegistrationRequest) =>
     api.post("users", { json: data }).json<RegistrationResponse>(),
 
-  // 👈 Nouvel endpoint pour refresh token
   refreshToken: (refreshToken: string) =>
     api
       .post("token/refresh", {
@@ -27,4 +26,7 @@ export const authAPI = {
 
   logout: (token: string) =>
     createAuthenticatedApi(token).post("logout").json(),
+
+  deleteAccount: (token: string, userId: string) =>
+    createAuthenticatedApi(token).delete(`users/${userId}`).json(),
 };

@@ -25,6 +25,7 @@ interface AuthState {
     plainPassword: string,
     firstname: string
   ) => Promise<boolean>;
+  deleteAccount: () => Promise<boolean>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -219,6 +220,61 @@ export const useAuthStore = create<AuthState>()(
           console.log(response);
         } catch (error) {
           console.log("Erreur lors de la récupération du profil:", error);
+        }
+      },
+
+      deleteAccount: async () => {
+        const { token, user } = get();
+
+        if (!token || !user?.id) {
+          console.log("DeleteAccount - Token ou ID utilisateur manquant");
+          return false;
+        }
+
+        set({ isLoading: true, error: null });
+
+        try {
+          console.log("DeleteAccount - Suppression du compte ID:", user.id);
+
+          // Étape 1 : Supprimer le compte
+          await authAPI.deleteAccount(token, user.id);
+          console.log("DeleteAccount - Compte supprimé avec succès");
+
+          // Étape 3 : Nettoyer l'état local
+          set({
+            user: null,
+            token: null,
+            refreshToken: null,
+            isLoading: false,
+            error: null,
+          });
+
+          console.log("DeleteAccount - Compte supprimé et état local nettoyé");
+          return true;
+        } catch (error: any) {
+          console.log("DeleteAccount - Erreur:", error);
+
+          let errorMessage = "Erreur lors de la suppression du compte";
+
+          if (error.response) {
+            const status = error.response.status;
+            if (status === 401) {
+              errorMessage = "Non autorisé à supprimer ce compte";
+            } else if (status === 404) {
+              errorMessage = "Compte non trouvé";
+            } else if (status === 403) {
+              errorMessage = "Accès interdit";
+            } else if (status === 500) {
+              errorMessage = "Erreur serveur, veuillez réessayer";
+            }
+          }
+
+          set({
+            isLoading: false,
+            error: errorMessage,
+          });
+
+          return false;
         }
       },
 
