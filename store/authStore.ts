@@ -60,13 +60,13 @@ export const useAuthStore = create<AuthState>()(
         } catch (error: any) {
           let errorMessage = "Erreur de connexion";
 
-          if (error.response) {
-            const status = error.response.status;
-            if (status === 401) {
-              errorMessage = "Email ou mot de passe incorrect";
-            } else if (status === 500) {
-              errorMessage = "Erreur serveur, veuillez réessayer";
-            }
+          if (error.response?.status === 401) {
+            errorMessage = "Email ou mot de passe incorrect";
+          } else if (error.response?.status === 500) {
+            errorMessage = "Erreur serveur, veuillez réessayer";
+          } else if (error.message?.includes("401")) {
+            // Fallback si error.response n'est pas disponible
+            errorMessage = "Email ou mot de passe incorrect";
           }
 
           set({

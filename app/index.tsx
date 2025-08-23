@@ -38,17 +38,18 @@ export default function Index() {
     if (error) {
       clearError();
     }
-  }, [username, password, error, clearError]);
+  }, [username, password, clearError]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleLogin = async () => {
     if (!username.trim() || !password.trim()) {
       Alert.alert("Erreur", "Veuillez remplir tout les champs");
       return;
     }
+
     const success = await login(username.trim(), password);
 
     if (success) {
-      console.log("connexion reussie");
+      console.log("connexion réussie");
     }
   };
 
@@ -132,7 +133,7 @@ export default function Index() {
             onPress={handleSignUp}
             disabled={isLoading}
           >
-            <ButtonText>S'inscrire</ButtonText>
+            <ButtonText>{`S'inscrire`}</ButtonText>
           </Button>
         </HStack>
       </VStack>
