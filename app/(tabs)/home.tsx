@@ -5,7 +5,7 @@ import { VStack } from "@/components/ui/vstack";
 import { useWelcomeScreen } from "@/hooks/useWelcomeScreen";
 import { View } from "react-native";
 
-export default function WelcomeScreen() {
+export default function HomeScreen() {
   const { user, handleLogout, handleDeleteAccount } = useWelcomeScreen();
 
   if (!user) {
