@@ -4,7 +4,10 @@ import {
   FormControlLabel,
   FormControlLabelText,
 } from "@/components/ui/form-control";
-import { Input, InputField } from "@/components/ui/input";
+import { Heading } from "@/components/ui/heading";
+import { HStack } from "@/components/ui/hstack";
+import { EyeIcon, EyeOffIcon } from "@/components/ui/icon";
+import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import { useAuth } from "@/contexts/AuthContext";
@@ -16,6 +19,13 @@ export default function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstname, setFirstname] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleShow = () => {
+    setShowPassword((showPassword) => {
+      return !showPassword;
+    });
+  };
 
   const { isLoading, error, clearError, isInitialized, registration } =
     useAuth();
@@ -26,6 +36,9 @@ export default function SignUp() {
       clearError();
     }
   }, [email, password, error, clearError]);
+  const handleLogin = () => {
+    router.replace("/signIn");
+  };
 
   const handleRegistration = async () => {
     if (!email.trim() || !password.trim()) {
@@ -61,77 +74,97 @@ export default function SignUp() {
       style={{
         flex: 1,
         justifyContent: "center",
-        alignItems: "center",
         padding: 20,
       }}
     >
-      <VStack
-        className="w-full rounded-md border border-background-200 p-4"
-        space="md"
-      >
-        <FormControl>
-          <FormControlLabel>
-            <FormControlLabelText>Entrez votre E-mail</FormControlLabelText>
-          </FormControlLabel>
-          <Input>
-            <InputField
-              type="text"
-              placeholder="E-mail"
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              autoCorrect={false}
-              keyboardType="email-address"
-            ></InputField>
-          </Input>
-        </FormControl>
-        <FormControl>
-          <FormControlLabel>
-            <FormControlLabelText>Entrez votre Prénom</FormControlLabelText>
-          </FormControlLabel>
-          <Input>
-            <InputField
-              type="text"
-              placeholder="Prénom"
-              value={firstname}
-              onChangeText={setFirstname}
-              autoCapitalize="words"
-              autoCorrect={false}
-              keyboardType="default"
-            ></InputField>
-          </Input>
-        </FormControl>
-        <FormControl>
-          <FormControlLabel>
-            <FormControlLabelText>
-              Entrez votre mot de passe
-            </FormControlLabelText>
-          </FormControlLabel>
-          <Input>
-            <InputField
-              type="password"
-              placeholder="Mot de passe"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={true}
-            ></InputField>
-          </Input>
-        </FormControl>
-
-        {/* Affichage des erreurs */}
-        {error && (
-          <Text size="sm" className="text-red-500 text-center">
-            {error}
+      <VStack space="md">
+        <VStack space="xs">
+          <Heading size="3xl">Créer un compte</Heading>
+          <Text size="sm">
+            Inscrivez-vous et commencez l'expérience Trail Ready
           </Text>
-        )}
-        <Button
-          className="w-fit self-end mt-4"
-          size="sm"
-          onPress={handleRegistration}
-          disabled={isLoading}
+        </VStack>
+        <VStack
+          className="w-full rounded-md border border-background-200 p-4"
+          space="md"
         >
-          <ButtonText>Enregistrer</ButtonText>
-        </Button>
+          <FormControl>
+            <FormControlLabel>
+              <FormControlLabelText>Entrez votre E-mail</FormControlLabelText>
+            </FormControlLabel>
+            <Input>
+              <InputField
+                type="text"
+                placeholder="E-mail"
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                autoCorrect={false}
+                keyboardType="email-address"
+              ></InputField>
+            </Input>
+          </FormControl>
+          <FormControl>
+            <FormControlLabel>
+              <FormControlLabelText>Entrez votre Prénom</FormControlLabelText>
+            </FormControlLabel>
+            <Input>
+              <InputField
+                type="text"
+                placeholder="Prénom"
+                value={firstname}
+                onChangeText={setFirstname}
+                autoCapitalize="words"
+                autoCorrect={false}
+                keyboardType="default"
+              ></InputField>
+            </Input>
+          </FormControl>
+          <FormControl>
+            <FormControlLabel>
+              <FormControlLabelText>
+                Entrez votre mot de passe
+              </FormControlLabelText>
+            </FormControlLabel>
+            <Input>
+              <InputField
+                type={showPassword ? "text" : "password"}
+                placeholder="Mot de passe"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+              />
+              <InputSlot className="pr-3" onPress={handleShow}>
+                <InputIcon as={showPassword ? EyeIcon : EyeOffIcon} />
+              </InputSlot>
+            </Input>
+          </FormControl>
+
+          {/* Affichage des erreurs */}
+          {error && (
+            <Text size="sm" className="text-red-500 text-center">
+              {error}
+            </Text>
+          )}
+          <Button
+            className="mt-4"
+            size="sm"
+            onPress={handleRegistration}
+            disabled={isLoading}
+          >
+            <ButtonText>Enregistrer</ButtonText>
+          </Button>
+          <HStack className="justify-center items-center mt-4" space="xs">
+            <Text size="sm">Vous avez déjà un compte ?</Text>
+            <Text
+              size="sm"
+              className="text-blue-500 underline"
+              onPress={handleLogin}
+            >
+              Se connecter
+            </Text>
+          </HStack>
+        </VStack>
       </VStack>
     </View>
   );

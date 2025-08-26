@@ -4,8 +4,10 @@ import {
   FormControlLabel,
   FormControlLabelText,
 } from "@/components/ui/form-control";
+import { Heading } from "@/components/ui/heading";
 import { HStack } from "@/components/ui/hstack";
-import { Input, InputField } from "@/components/ui/input";
+import { EyeIcon, EyeOffIcon } from "@/components/ui/icon";
+import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import { useAuth } from "@/contexts/AuthContext";
@@ -16,6 +18,7 @@ import { Alert, View } from "react-native";
 export default function SignIn() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const {
     login,
     isLoading,
@@ -25,11 +28,17 @@ export default function SignIn() {
     isInitialized,
   } = useAuth();
 
+  const handleShow = () => {
+    setShowPassword((showPassword) => {
+      return !showPassword;
+    });
+  };
+
   //Redirection automatique si utilisateur déjà loggué
   useEffect(() => {
     if (isInitialized && isAuthenticated) {
-      console.log("Redirection vers /welcome");
-      router.replace("/welcome");
+      console.log("Redirection vers /home");
+      router.replace("/(tabs)/home");
     }
   }, [isAuthenticated, isInitialized]);
 
@@ -57,7 +66,6 @@ export default function SignIn() {
     router.replace("/signUp");
   };
 
-  // 👈 Ajouter cet écran de chargement
   if (!isInitialized) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -67,75 +75,79 @@ export default function SignIn() {
   }
 
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        padding: 20,
-      }}
-    >
-      <VStack
-        className="w-full rounded-md border border-background-200 p-4"
-        space="md"
-      >
-        <FormControl>
-          <FormControlLabel>
-            <FormControlLabelText>Entrez votre E-mail</FormControlLabelText>
-          </FormControlLabel>
-          <Input>
-            <InputField
-              type="text"
-              placeholder="E-mail"
-              value={username}
-              onChangeText={setUsername}
-              autoCapitalize="none"
-              autoCorrect={false}
-              keyboardType="email-address"
-            ></InputField>
-          </Input>
-        </FormControl>
-        <FormControl>
-          <FormControlLabel>
-            <FormControlLabelText>
-              Entrez votre mot de passe
-            </FormControlLabelText>
-          </FormControlLabel>
-          <Input>
-            <InputField
-              type="password"
-              placeholder="Mot de passe"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={true}
-            ></InputField>
-          </Input>
-        </FormControl>
+    <View className="flex-1 justify-center p-5 min-h-full">
+      <VStack space="md">
+        <VStack space="xs">
+          <Heading size="3xl">Se connecter</Heading>
+          <Text size="sm">Connectez-vous pour accéder à Trail Ready</Text>
+        </VStack>
+        <VStack
+          className="w-full rounded-md border border-background-200 p-4"
+          space="md"
+        >
+          <FormControl>
+            <FormControlLabel>
+              <FormControlLabelText>Entrez votre E-mail</FormControlLabelText>
+            </FormControlLabel>
+            <Input>
+              <InputField
+                type="text"
+                placeholder="E-mail"
+                value={username}
+                onChangeText={setUsername}
+                autoCapitalize="none"
+                autoCorrect={false}
+                keyboardType="email-address"
+              ></InputField>
+            </Input>
+          </FormControl>
+          <FormControl>
+            <FormControlLabel>
+              <FormControlLabelText>
+                Entrez votre mot de passe
+              </FormControlLabelText>
+            </FormControlLabel>
+            <Input>
+              <InputField
+                type={showPassword ? "text" : "password"}
+                placeholder="Mot de passe"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+              />
+              <InputSlot className="pr-3" onPress={handleShow}>
+                <InputIcon as={showPassword ? EyeIcon : EyeOffIcon} />
+              </InputSlot>
+            </Input>
+          </FormControl>
 
-        {/* Affichage des erreurs */}
-        {error && (
-          <Text size="sm" className="text-red-500 text-center">
-            {error}
-          </Text>
-        )}
-        <HStack space="md" className="flex justify-end">
-          <Button
-            className="w-fit self-end mt-4"
-            size="sm"
-            onPress={handleLogin}
-            disabled={isLoading}
-          >
-            <ButtonText>Se connecter</ButtonText>
-          </Button>
-          <Button
-            className="w-fit self-end mt-4"
-            size="sm"
-            onPress={handleSignUp}
-            disabled={isLoading}
-          >
-            <ButtonText>{`S'inscrire`}</ButtonText>
-          </Button>
-        </HStack>
+          {/* Affichage des erreurs */}
+          {error && (
+            <Text size="sm" className="text-red-500 text-center">
+              {error}
+            </Text>
+          )}
+          <VStack space="md" className="w-full">
+            <Button
+              className="w-full mt-4"
+              size="sm"
+              onPress={handleLogin}
+              disabled={isLoading}
+            >
+              <ButtonText>Se connecter</ButtonText>
+            </Button>
+            <HStack className="justify-center items-center mt-4" space="xs">
+              <Text size="sm">Vous n'avez pas de compte ?</Text>
+              <Text
+                size="sm"
+                className="text-blue-500 underline"
+                onPress={handleSignUp}
+              >
+                Créer un compte
+              </Text>
+            </HStack>
+          </VStack>
+        </VStack>
       </VStack>
     </View>
   );

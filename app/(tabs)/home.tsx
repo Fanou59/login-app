@@ -23,7 +23,7 @@ export default function HomeScreen() {
         <Button onPress={handleLogout}>
           <ButtonText>Se deconnecter</ButtonText>
         </Button>
-        <Button onPress={handleDeleteAccount}>
+        <Button onPress={handleDeleteAccount} action="negative">
           <ButtonText>Supprimer mon compte</ButtonText>
         </Button>
       </VStack>
