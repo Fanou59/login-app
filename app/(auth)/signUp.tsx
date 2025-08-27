@@ -80,9 +80,7 @@ export default function SignUp() {
       <VStack space="md">
         <VStack space="xs">
           <Heading size="3xl">Créer un compte</Heading>
-          <Text size="sm">
-            Inscrivez-vous et commencez l'expérience Trail Ready
-          </Text>
+          <Text size="sm">&apos;expérience Trail Ready</Text>
         </VStack>
         <VStack
           className="w-full rounded-md border border-background-200 p-4"
