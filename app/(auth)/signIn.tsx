@@ -98,12 +98,12 @@ export default function SignIn() {
         >
           <FormControl>
             <FormControlLabel>
-              <FormControlLabelText>Entrez votre E-mail</FormControlLabelText>
+              <FormControlLabelText>E-mail</FormControlLabelText>
             </FormControlLabel>
             <Input>
               <InputField
                 type="text"
-                placeholder="E-mail"
+                placeholder="john.doe@gmail.com"
                 value={username}
                 onChangeText={setUsername}
                 autoCapitalize="none"
@@ -116,9 +116,7 @@ export default function SignIn() {
           </FormControl>
           <FormControl>
             <FormControlLabel>
-              <FormControlLabelText>
-                Entrez votre mot de passe
-              </FormControlLabelText>
+              <FormControlLabelText>Mot de passe</FormControlLabelText>
             </FormControlLabel>
             <Input>
               <InputField

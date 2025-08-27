@@ -105,12 +105,12 @@ export default function SignUp() {
         >
           <FormControl>
             <FormControlLabel>
-              <FormControlLabelText>Entrez votre E-mail</FormControlLabelText>
+              <FormControlLabelText>E-mail</FormControlLabelText>
             </FormControlLabel>
             <Input>
               <InputField
                 type="text"
-                placeholder="E-mail"
+                placeholder="john.doe@gmail.com"
                 value={email}
                 onChangeText={setEmail}
                 autoCapitalize="none"
@@ -121,12 +121,12 @@ export default function SignUp() {
           </FormControl>
           <FormControl>
             <FormControlLabel>
-              <FormControlLabelText>Entrez votre Prénom</FormControlLabelText>
+              <FormControlLabelText>Prénom</FormControlLabelText>
             </FormControlLabel>
             <Input>
               <InputField
                 type="text"
-                placeholder="Prénom"
+                placeholder="John"
                 value={firstname}
                 onChangeText={setFirstname}
                 autoCapitalize="words"
@@ -137,9 +137,7 @@ export default function SignUp() {
           </FormControl>
           <FormControl>
             <FormControlLabel>
-              <FormControlLabelText>
-                Entrez votre mot de passe
-              </FormControlLabelText>
+              <FormControlLabelText>Mot de passe</FormControlLabelText>
             </FormControlLabel>
             <Input>
               <InputField
