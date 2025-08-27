@@ -13,7 +13,7 @@ import { VStack } from "@/components/ui/vstack";
 import { useAuth } from "@/contexts/AuthContext";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Alert, View } from "react-native";
+import { Alert, Image, View } from "react-native";
 
 export default function SignIn() {
   const [username, setUsername] = useState("");
@@ -75,8 +75,19 @@ export default function SignIn() {
   }
 
   return (
-    <View className="flex-1 justify-center p-5 min-h-full">
-      <VStack space="md">
+    <VStack className="flex-1">
+      <VStack className="items-center pt-16 pb-8">
+        <Image
+          source={require("@/assets/images/trail-ready-logo.png")}
+          style={{
+            width: 120,
+            height: 120,
+            resizeMode: "contain",
+          }}
+        />
+      </VStack>
+
+      <VStack className="flex-1 justify-start pt-4 px-8" space="md">
         <VStack space="xs">
           <Heading size="3xl">Se connecter</Heading>
           <Text size="sm">Connectez-vous pour accéder à Trail Ready</Text>
@@ -98,6 +109,8 @@ export default function SignIn() {
                 autoCapitalize="none"
                 autoCorrect={false}
                 keyboardType="email-address"
+                accessibilityLabel="Champ email"
+                accessibilityHint="Entrez votre adresse email"
               ></InputField>
             </Input>
           </FormControl>
@@ -129,15 +142,15 @@ export default function SignIn() {
           )}
           <VStack space="md" className="w-full">
             <Button
-              className="w-full mt-4"
-              size="sm"
+              className={`w-full mt-6 ${isLoading ? "opacity-50" : ""}`}
+              size="md"
               onPress={handleLogin}
               disabled={isLoading}
             >
               <ButtonText>Se connecter</ButtonText>
             </Button>
             <HStack className="justify-center items-center mt-4" space="xs">
-              <Text size="sm">Vous n'avez pas de compte ?</Text>
+              <Text size="sm">Vous n&apos;avez pas de compte ?</Text>
               <Text
                 size="sm"
                 className="text-blue-500 underline"
@@ -149,6 +162,6 @@ export default function SignIn() {
           </VStack>
         </VStack>
       </VStack>
-    </View>
+    </VStack>
   );
 }

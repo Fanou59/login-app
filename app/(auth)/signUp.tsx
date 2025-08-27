@@ -13,13 +13,15 @@ import { VStack } from "@/components/ui/vstack";
 import { useAuth } from "@/contexts/AuthContext";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Alert, View } from "react-native";
+import { Alert, Image, View } from "react-native";
 
 export default function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [firstname, setFirstname] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleShow = () => {
     setShowPassword((showPassword) => {
@@ -27,6 +29,11 @@ export default function SignUp() {
     });
   };
 
+  const handleShowConfirm = () => {
+    setShowConfirmPassword((showConfirmPassword) => {
+      return !showConfirmPassword;
+    });
+  };
   const { isLoading, error, clearError, isInitialized, registration } =
     useAuth();
 
@@ -45,6 +52,12 @@ export default function SignUp() {
       Alert.alert("Erreur", "Veuillez remplir tout les champs");
       return;
     }
+
+    if (password !== confirmPassword) {
+      Alert.alert("Erreur", "Les mots de passe ne correspondent pas.");
+      return;
+    }
+
     const success = await registration(
       email.trim(),
       password,
@@ -70,17 +83,21 @@ export default function SignUp() {
   }
 
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        padding: 20,
-      }}
-    >
-      <VStack space="md">
+    <VStack className="flex-1">
+      <VStack className="items-center pt-16 pb-8">
+        <Image
+          source={require("@/assets/images/trail-ready-logo.png")}
+          style={{
+            width: 120,
+            height: 120,
+            resizeMode: "contain",
+          }}
+        />
+      </VStack>
+      <VStack className="flex-1 justify-start pt-4 px-8" space="md">
         <VStack space="xs">
           <Heading size="3xl">Créer un compte</Heading>
-          <Text size="sm">&apos;expérience Trail Ready</Text>
+          <Text size="sm">Démarrer votre expérience Trail Ready</Text>
         </VStack>
         <VStack
           className="w-full rounded-md border border-background-200 p-4"
@@ -137,6 +154,25 @@ export default function SignUp() {
               </InputSlot>
             </Input>
           </FormControl>
+          <FormControl>
+            <FormControlLabel>
+              <FormControlLabelText>
+                Confirmez votre mot de passe
+              </FormControlLabelText>
+            </FormControlLabel>
+            <Input>
+              <InputField
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="Mot de passe"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry={!showConfirmPassword}
+              />
+              <InputSlot className="pr-3" onPress={handleShowConfirm}>
+                <InputIcon as={showConfirmPassword ? EyeIcon : EyeOffIcon} />
+              </InputSlot>
+            </Input>
+          </FormControl>
 
           {/* Affichage des erreurs */}
           {error && (
@@ -145,8 +181,8 @@ export default function SignUp() {
             </Text>
           )}
           <Button
-            className="mt-4"
-            size="sm"
+            className={`w-full mt-6 ${isLoading ? "opacity-50" : ""}`}
+            size="md"
             onPress={handleRegistration}
             disabled={isLoading}
           >
@@ -164,6 +200,6 @@ export default function SignUp() {
           </HStack>
         </VStack>
       </VStack>
-    </View>
+    </VStack>
   );
 }
