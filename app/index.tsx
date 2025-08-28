@@ -2,7 +2,7 @@ import { Text } from "@/components/ui/text";
 import { useAuth } from "@/contexts/AuthContext";
 import { Redirect } from "expo-router";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, Image, View } from "react-native";
 
 export default function SplashScreen() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -25,7 +25,18 @@ export default function SplashScreen() {
           backgroundColor: "#FFF",
         }}
       >
-        <Text size="3xl" style={{ fontWeight: "bold", marginBottom: 20 }}>
+        <Image
+          source={require("@/assets/images/trail-ready-logo.png")}
+          style={{
+            width: 120,
+            height: 120,
+            resizeMode: "contain",
+          }}
+        />
+        <Text
+          size="3xl"
+          style={{ fontWeight: "bold", marginBottom: 20, paddingTop: 4 }}
+        >
           Trail Ready
         </Text>
         <ActivityIndicator size="large" color="#007AFF" />

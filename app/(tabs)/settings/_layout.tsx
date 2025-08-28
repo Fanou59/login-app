@@ -6,7 +6,9 @@ export default function SettingsStackLayout() {
       <Stack.Screen name="index" options={{ title: "Paramètres" }} />
       <Stack.Screen
         name="editProfile"
-        options={{ title: "Modifier le profil" }}
+        options={{
+          headerTitle: "",
+        }}
       />
     </Stack>
   );

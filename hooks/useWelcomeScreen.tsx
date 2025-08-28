@@ -3,7 +3,7 @@ import { router } from "expo-router";
 import { useEffect } from "react";
 import { Alert } from "react-native";
 
-export const useWelcomeScreen = () => {
+export const useUserScreen = () => {
   const { user, logout, isAuthenticated, deleteAccount } = useAuth();
 
   useEffect(() => {
