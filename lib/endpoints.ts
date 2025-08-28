@@ -6,7 +6,7 @@ import type {
   RegistrationResponse,
   User,
 } from "@/types/auth";
-import { api, createAuthenticatedApi } from "./api";
+import { api, createAuthenticatedApi, createAuthenticatedApiJSON } from "./api";
 
 export const authAPI = {
   login: (credentials: LoginRequest) =>
@@ -29,4 +29,10 @@ export const authAPI = {
 
   deleteAccount: (token: string, userId: string) =>
     createAuthenticatedApi(token).delete(`users/${userId}`).json(),
+
+  // ✅ Nouveau endpoint pour mettre à jour le profil
+  updateProfile: (token: string, userId: string, data: any) =>
+    createAuthenticatedApiJSON(token)
+      .patch(`users/${userId}`, { json: data })
+      .json<User>(),
 };

@@ -1,10 +1,10 @@
 export interface User {
   id: string;
-  name: string;
+  name?: string;
   email: string;
   username?: string;
-  firstName?: string;
-  lastName?: string;
+  firstname: string;
+  lastname?: string;
 }
 
 export interface LoginRequest {

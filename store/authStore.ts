@@ -26,6 +26,7 @@ interface AuthState {
     firstname: string
   ) => Promise<boolean>;
   deleteAccount: () => Promise<boolean>;
+  setUser: (user: User | null) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -202,6 +203,10 @@ export const useAuthStore = create<AuthState>()(
 
           return false;
         }
+      },
+
+      setUser: (user: User | null) => {
+        set({ user });
       },
 
       // Effacer les erreurs

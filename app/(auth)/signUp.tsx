@@ -11,17 +11,32 @@ import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import { useAuth } from "@/contexts/AuthContext";
+import { useProfileFormStore } from "@/store/profilStore";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert, Image, View } from "react-native";
 
 export default function SignUp() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [firstname, setFirstname] = useState("");
+  // const [email, setEmail] = useState("");
+  // const [password, setPassword] = useState("");
+  // const [confirmPassword, setConfirmPassword] = useState("");
+  // const [firstname, setFirstname] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const {
+    firstname,
+    email,
+    newPassword,
+    confirmPassword,
+    errors,
+    setFirstname,
+    setEmail,
+    setNewPassword,
+    setConfirmPassword,
+    validateForm,
+    resetForm,
+  } = useProfileFormStore();
 
   const handleShow = () => {
     setShowPassword((showPassword) => {
@@ -37,36 +52,40 @@ export default function SignUp() {
   const { isLoading, error, clearError, isInitialized, registration } =
     useAuth();
 
+  // Reset du formulaire au montage du composant
+  useEffect(() => {
+    resetForm();
+  }, [resetForm]);
+
   // Effacer les erreurs quand l'utilisateur tape
   useEffect(() => {
     if (error) {
       clearError();
     }
-  }, [email, password, error, clearError]);
+  }, [email, newPassword, error, clearError]);
+
   const handleLogin = () => {
     router.replace("/signIn");
   };
 
   const handleRegistration = async () => {
-    if (!email.trim() || !password.trim()) {
-      Alert.alert("Erreur", "Veuillez remplir tout les champs");
+    if (!validateForm()) {
       return;
     }
-
-    if (password !== confirmPassword) {
+    if (newPassword !== confirmPassword) {
       Alert.alert("Erreur", "Les mots de passe ne correspondent pas.");
       return;
     }
 
     const success = await registration(
       email.trim(),
-      password,
+      newPassword,
       firstname.trim()
     );
 
     if (success) {
       console.log("utilisateur enregistré");
-
+      resetForm();
       Alert.alert("Succés", "Votre compte est créé", [
         { text: "OK", onPress: () => router.replace("/") },
       ]);
@@ -116,8 +135,13 @@ export default function SignUp() {
                 autoCapitalize="none"
                 autoCorrect={false}
                 keyboardType="email-address"
-              ></InputField>
+              />
             </Input>
+            {errors.email && (
+              <Text size="sm" className="text-red-500 mt-1">
+                {errors.email}
+              </Text>
+            )}
           </FormControl>
           <FormControl>
             <FormControlLabel>
@@ -143,8 +167,8 @@ export default function SignUp() {
               <InputField
                 type={showPassword ? "text" : "password"}
                 placeholder="Mot de passe"
-                value={password}
-                onChangeText={setPassword}
+                value={newPassword}
+                onChangeText={setNewPassword}
                 secureTextEntry={!showPassword}
               />
               <InputSlot className="pr-3" onPress={handleShow}>

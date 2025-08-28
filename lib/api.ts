@@ -17,3 +17,14 @@ export const createAuthenticatedApi = (token: string) => {
     },
   });
 };
+
+// ✅ AJOUT : API spécifique pour les mises à jour avec Content-Type JSON
+export const createAuthenticatedApiJSON = (token: string) => {
+  return api.extend({
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/merge-patch+json",
+      Accept: "application/ld+json",
+    },
+  });
+};

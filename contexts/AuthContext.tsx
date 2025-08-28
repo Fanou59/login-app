@@ -1,7 +1,9 @@
+import { authAPI } from "@/lib/endpoints";
 import { useAuthStore } from "@/store/authStore";
 import React, {
   createContext,
   ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useState,
@@ -24,6 +26,8 @@ interface AuthContextType {
     firstname: string
   ) => Promise<boolean>;
   deleteAccount: () => Promise<boolean>;
+  refreshUserProfile: () => Promise<void>;
+  updateUserData: (newUserData: any) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -41,6 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     checkAuth,
     registration: storeRegistration,
     deleteAccount: storeDeleteAccount,
+    setUser,
   } = useAuthStore();
 
   // Vérifier l'auth au démarrage
@@ -71,6 +76,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return await storeDeleteAccount();
   };
 
+  // ✅ Nouvelle méthode pour recharger le profil utilisateur
+  const refreshUserProfile = useCallback(async () => {
+    if (!token) return;
+
+    try {
+      const userData = await authAPI.me(token);
+      setUser(userData);
+      console.log("Profil utilisateur rechargé:", userData);
+    } catch (error) {
+      console.error("Erreur lors du rechargement du profil:", error);
+    }
+  }, [token, setUser]);
+
+  // ✅ Méthode pour mettre à jour l'utilisateur directement
+  const updateUserData = useCallback(
+    (newUserData: any) => {
+      console.log(
+        "AuthContext - Mise à jour des données utilisateur:",
+        newUserData
+      );
+      setUser(newUserData);
+    },
+    [setUser]
+  );
+
   const isAuthenticated = !!user && !!token;
 
   return (
@@ -87,6 +117,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         clearError,
         registration,
         deleteAccount,
+        refreshUserProfile,
+        updateUserData,
       }}
     >
       {children}
