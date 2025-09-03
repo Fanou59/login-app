@@ -6,11 +6,6 @@ interface UserProfileProps {
 }
 
 export const UserProfile = ({ user }: UserProfileProps) => {
-  // ✅ Debug pour voir les données reçues
-  console.log("UserProfile - Données utilisateur reçues:", user);
-  console.log("UserProfile - firstname:", user.firstname);
-  console.log("UserProfile - lastname:", user.lastname);
-
   return (
     <>
       <Text size="xl">Bienvenue !</Text>
