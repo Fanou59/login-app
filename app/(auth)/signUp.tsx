@@ -66,6 +66,8 @@ export default function SignUp() {
       Alert.alert("Succés", "Votre compte est créé", [
         { text: "OK", onPress: () => router.replace("/") },
       ]);
+    } else {
+      Alert.alert("Erreur", error || "Erreur lors de la création de compte");
     }
   };
 
@@ -120,6 +122,7 @@ export default function SignUp() {
           <PasswordField
             label="Mot de passe"
             placeholder="Mot de passe"
+            error={errors.newPassword}
             value={newPassword}
             onChangeText={setNewPassword}
           />
@@ -127,6 +130,7 @@ export default function SignUp() {
           <PasswordField
             label="Confirmez votre mot de passe"
             placeholder="Mot de passe"
+            error={errors.confirmPassword}
             value={confirmPassword}
             onChangeText={setConfirmPassword}
           />
