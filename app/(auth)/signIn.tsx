@@ -1,13 +1,8 @@
 import { PasswordField } from "@/components/features/PasswordField";
+import { TextField } from "@/components/features/TextField";
 import { Button, ButtonText } from "@/components/ui/button";
-import {
-  FormControl,
-  FormControlLabel,
-  FormControlLabelText,
-} from "@/components/ui/form-control";
 import { Heading } from "@/components/ui/heading";
 import { HStack } from "@/components/ui/hstack";
-import { Input, InputField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import { useAuth } from "@/contexts/AuthContext";
@@ -90,24 +85,14 @@ export default function SignIn() {
           className="w-full rounded-md border border-background-200 p-4"
           space="md"
         >
-          <FormControl>
-            <FormControlLabel>
-              <FormControlLabelText>E-mail</FormControlLabelText>
-            </FormControlLabel>
-            <Input>
-              <InputField
-                type="text"
-                placeholder="john.doe@gmail.com"
-                value={username}
-                onChangeText={setUsername}
-                autoCapitalize="none"
-                autoCorrect={false}
-                keyboardType="email-address"
-                accessibilityLabel="Champ email"
-                accessibilityHint="Entrez votre adresse email"
-              ></InputField>
-            </Input>
-          </FormControl>
+          <TextField
+            label="E-mail"
+            placeholder="john.doe@gmail.com"
+            value={username}
+            onChangeText={setUsername}
+            accessibilityLabel="Champ email"
+            accessibilityHint="Entrez votre email"
+          />
           <PasswordField
             label="Mot de passe"
             placeholder="Mot de passe"

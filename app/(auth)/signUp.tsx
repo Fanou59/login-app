@@ -1,13 +1,8 @@
 import { PasswordField } from "@/components/features/PasswordField";
+import { TextField } from "@/components/features/TextField";
 import { Button, ButtonText } from "@/components/ui/button";
-import {
-  FormControl,
-  FormControlLabel,
-  FormControlLabelText,
-} from "@/components/ui/form-control";
 import { Heading } from "@/components/ui/heading";
 import { HStack } from "@/components/ui/hstack";
-import { Input, InputField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import { useAuth } from "@/contexts/AuthContext";
@@ -104,43 +99,24 @@ export default function SignUp() {
           className="w-full rounded-md border border-background-200 p-4"
           space="md"
         >
-          <FormControl>
-            <FormControlLabel>
-              <FormControlLabelText>E-mail</FormControlLabelText>
-            </FormControlLabel>
-            <Input>
-              <InputField
-                type="text"
-                placeholder="john.doe@gmail.com"
-                value={email}
-                onChangeText={setEmail}
-                autoCapitalize="none"
-                autoCorrect={false}
-                keyboardType="email-address"
-              />
-            </Input>
-            {errors.email && (
-              <Text size="sm" className="text-red-500 mt-1">
-                {errors.email}
-              </Text>
-            )}
-          </FormControl>
-          <FormControl>
-            <FormControlLabel>
-              <FormControlLabelText>Prénom</FormControlLabelText>
-            </FormControlLabel>
-            <Input>
-              <InputField
-                type="text"
-                placeholder="John"
-                value={firstname}
-                onChangeText={setFirstname}
-                autoCapitalize="words"
-                autoCorrect={false}
-                keyboardType="default"
-              ></InputField>
-            </Input>
-          </FormControl>
+          <TextField
+            label="E-mail"
+            placeholder="john.doe@gmail.com"
+            value={email}
+            error={errors.email}
+            onChangeText={setEmail}
+            accessibilityLabel="Champ email"
+            accessibilityHint="Entrez votre email"
+          />
+          <TextField
+            label="Prénom"
+            placeholder="Votre prénom"
+            value={firstname}
+            onChangeText={setFirstname}
+            error={errors.firstname}
+            accessibilityLabel="Champ prenom"
+            accessibilityHint="Entrez votre prenom"
+          />
           <PasswordField
             label="Mot de passe"
             placeholder="Mot de passe"
