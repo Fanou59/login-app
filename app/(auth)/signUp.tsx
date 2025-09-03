@@ -1,3 +1,4 @@
+import { PasswordField } from "@/components/features/PasswordField";
 import { Button, ButtonText } from "@/components/ui/button";
 import {
   FormControl,
@@ -6,24 +7,16 @@ import {
 } from "@/components/ui/form-control";
 import { Heading } from "@/components/ui/heading";
 import { HStack } from "@/components/ui/hstack";
-import { EyeIcon, EyeOffIcon } from "@/components/ui/icon";
-import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
+import { Input, InputField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfileFormStore } from "@/store/profilStore";
 import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Alert, Image, View } from "react-native";
 
 export default function SignUp() {
-  // const [email, setEmail] = useState("");
-  // const [password, setPassword] = useState("");
-  // const [confirmPassword, setConfirmPassword] = useState("");
-  // const [firstname, setFirstname] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
   const {
     firstname,
     email,
@@ -38,17 +31,6 @@ export default function SignUp() {
     resetForm,
   } = useProfileFormStore();
 
-  const handleShow = () => {
-    setShowPassword((showPassword) => {
-      return !showPassword;
-    });
-  };
-
-  const handleShowConfirm = () => {
-    setShowConfirmPassword((showConfirmPassword) => {
-      return !showConfirmPassword;
-    });
-  };
   const { isLoading, error, clearError, isInitialized, registration } =
     useAuth();
 
@@ -159,49 +141,19 @@ export default function SignUp() {
               ></InputField>
             </Input>
           </FormControl>
-          <FormControl>
-            <FormControlLabel>
-              <FormControlLabelText>Mot de passe</FormControlLabelText>
-            </FormControlLabel>
-            <Input>
-              <InputField
-                type={showPassword ? "text" : "password"}
-                placeholder="Mot de passe"
-                value={newPassword}
-                onChangeText={setNewPassword}
-                secureTextEntry={!showPassword}
-              />
-              <InputSlot className="pr-3" onPress={handleShow}>
-                <InputIcon as={showPassword ? EyeIcon : EyeOffIcon} />
-              </InputSlot>
-            </Input>
-          </FormControl>
-          <FormControl>
-            <FormControlLabel>
-              <FormControlLabelText>
-                Confirmez votre mot de passe
-              </FormControlLabelText>
-            </FormControlLabel>
-            <Input>
-              <InputField
-                type={showConfirmPassword ? "text" : "password"}
-                placeholder="Mot de passe"
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                secureTextEntry={!showConfirmPassword}
-              />
-              <InputSlot className="pr-3" onPress={handleShowConfirm}>
-                <InputIcon as={showConfirmPassword ? EyeIcon : EyeOffIcon} />
-              </InputSlot>
-            </Input>
-          </FormControl>
+          <PasswordField
+            label="Mot de passe"
+            placeholder="Mot de passe"
+            value={newPassword}
+            onChangeText={setNewPassword}
+          />
 
-          {/* Affichage des erreurs */}
-          {error && (
-            <Text size="sm" className="text-red-500 text-center">
-              {error}
-            </Text>
-          )}
+          <PasswordField
+            label="Confirmez votre mot de passe"
+            placeholder="Mot de passe"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+          />
           <Button
             className={`w-full mt-6 ${isLoading ? "opacity-50" : ""}`}
             size="md"

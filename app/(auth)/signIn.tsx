@@ -1,3 +1,4 @@
+import { PasswordField } from "@/components/features/PasswordField";
 import { Button, ButtonText } from "@/components/ui/button";
 import {
   FormControl,
@@ -6,8 +7,7 @@ import {
 } from "@/components/ui/form-control";
 import { Heading } from "@/components/ui/heading";
 import { HStack } from "@/components/ui/hstack";
-import { EyeIcon, EyeOffIcon } from "@/components/ui/icon";
-import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
+import { Input, InputField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import { useAuth } from "@/contexts/AuthContext";
@@ -18,7 +18,7 @@ import { Alert, Image, View } from "react-native";
 export default function SignIn() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+
   const {
     login,
     isLoading,
@@ -27,12 +27,6 @@ export default function SignIn() {
     isAuthenticated,
     isInitialized,
   } = useAuth();
-
-  const handleShow = () => {
-    setShowPassword((showPassword) => {
-      return !showPassword;
-    });
-  };
 
   //Redirection automatique si utilisateur déjà loggué
   useEffect(() => {
@@ -114,30 +108,12 @@ export default function SignIn() {
               ></InputField>
             </Input>
           </FormControl>
-          <FormControl>
-            <FormControlLabel>
-              <FormControlLabelText>Mot de passe</FormControlLabelText>
-            </FormControlLabel>
-            <Input>
-              <InputField
-                type={showPassword ? "text" : "password"}
-                placeholder="Mot de passe"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry={!showPassword}
-              />
-              <InputSlot className="pr-3" onPress={handleShow}>
-                <InputIcon as={showPassword ? EyeIcon : EyeOffIcon} />
-              </InputSlot>
-            </Input>
-          </FormControl>
-
-          {/* Affichage des erreurs */}
-          {error && (
-            <Text size="sm" className="text-red-500 text-center">
-              {error}
-            </Text>
-          )}
+          <PasswordField
+            label="Mot de passe"
+            placeholder="Mot de passe"
+            value={password}
+            onChangeText={setPassword}
+          />
           <VStack space="md" className="w-full">
             <Button
               className={`w-full mt-6 ${isLoading ? "opacity-50" : ""}`}

@@ -1,12 +1,7 @@
+import { PasswordField } from "@/components/features/PasswordField";
+import { TextField } from "@/components/features/TextField";
 import { Button, ButtonText } from "@/components/ui/button";
-import {
-  FormControl,
-  FormControlLabel,
-  FormControlLabelText,
-} from "@/components/ui/form-control";
 import { Heading } from "@/components/ui/heading";
-import { Input, InputField } from "@/components/ui/input";
-import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserScreen } from "@/hooks/useWelcomeScreen";
@@ -24,12 +19,16 @@ export default function EditProfileScreen() {
     email,
     errors,
     isLoading,
+    newPassword,
+    confirmPassword,
     setFirstname,
     setLastname,
     setEmail,
     initializeFromUser,
     validateForm,
     updateProfile,
+    setNewPassword,
+    setConfirmPassword,
   } = useProfileFormStore();
 
   useEffect(() => {
@@ -69,75 +68,50 @@ export default function EditProfileScreen() {
       <VStack className="flex-1">
         <Heading size="2xl">Modifier le profil</Heading>
         <VStack space="md" className="mt-2">
-          <FormControl>
-            <FormControlLabel>
-              <FormControlLabelText>Prénom</FormControlLabelText>
-            </FormControlLabel>
-            <Input>
-              <InputField
-                type="text"
-                placeholder="Votre prénom"
-                value={firstname}
-                onChangeText={setFirstname}
-                autoCapitalize="sentences"
-                autoCorrect={false}
-                keyboardType="default"
-                accessibilityLabel="Champ prenom"
-                accessibilityHint="Entrez votre prenom"
-              />
-            </Input>
-            {errors.firstname && (
-              <Text size="sm" className="text-red-500 mt-1">
-                {errors.firstname}
-              </Text>
-            )}
-          </FormControl>
-          <FormControl>
-            <FormControlLabel>
-              <FormControlLabelText>Nom</FormControlLabelText>
-            </FormControlLabel>
-            <Input>
-              <InputField
-                type="text"
-                placeholder="Votre nom"
-                value={lastname}
-                onChangeText={setLastname}
-                autoCapitalize="sentences"
-                autoCorrect={false}
-                keyboardType="default"
-                accessibilityLabel="Champ nom"
-                accessibilityHint="Entrez votre nom"
-              />
-            </Input>
-            {errors.lastname && (
-              <Text size="sm" className="text-red-500 mt-1">
-                {errors.lastname}
-              </Text>
-            )}
-          </FormControl>
-          <FormControl>
-            <FormControlLabel>
-              <FormControlLabelText>E-mail</FormControlLabelText>
-            </FormControlLabel>
-            <Input>
-              <InputField
-                type="text"
-                placeholder="john.doe@gmail.com"
-                value={email}
-                onChangeText={setEmail}
-                autoCapitalize="none"
-                autoCorrect={false}
-                keyboardType="email-address"
-                accessibilityLabel="Champ email"
-                accessibilityHint="Entrez votre adresse email"
-              />
-            </Input>
-            {errors.email && (
-              <Text size="sm" className="text-red-500 mt-1">
-                {errors.email}
-              </Text>
-            )}
-          </FormControl>
+          <TextField
+            label="Prénom"
+            placeholder="Votre prénom"
+            value={firstname}
+            onChangeText={setFirstname}
+            error={errors.firstname}
+            accessibilityLabel="Champ prenom"
+            accessibilityHint="Entrez votre prenom"
+          />
+
+          <TextField
+            label="Nom"
+            placeholder="Votre nom"
+            value={lastname}
+            onChangeText={setLastname}
+            error={errors.lastname}
+            accessibilityLabel="Champ nom"
+            accessibilityHint="Entrez votre nom"
+          />
+
+          <TextField
+            label="E-mail"
+            placeholder="john.doe@gmail.com"
+            value={email}
+            onChangeText={setEmail}
+            error={errors.email}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            accessibilityLabel="Champ email"
+            accessibilityHint="Entrez votre adresse email"
+          />
+          <PasswordField
+            label="Mot de passe"
+            placeholder="Mot de passe"
+            value={newPassword}
+            onChangeText={setNewPassword}
+          />
+
+          <PasswordField
+            label="Confirmez votre mot de passe"
+            placeholder="Mot de passe"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+          />
           <Button
             onPress={handleSaveProfile}
             className={`mt-4 ${isLoading ? "opacity-50" : ""}`}
