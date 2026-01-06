@@ -4,7 +4,7 @@ import { Image } from "react-native";
 
 export function Header() {
   return (
-    <VStack className="items-center" space="sm">
+    <VStack className="items-center" space="xs">
       <Image
         source={require("@/assets/images/trail-ready-logo.png")}
         style={{
@@ -13,7 +13,7 @@ export function Header() {
           resizeMode: "contain",
         }}
       />
-      <Text className="text-4xl">Trail Ready</Text>
+      <Text className="text-3xl">Trail Ready</Text>
       <Text className="text-base">Votre expérience commence ici</Text>
     </VStack>
   );

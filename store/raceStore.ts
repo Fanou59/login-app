@@ -1,6 +1,7 @@
-import type { Race } from "@/types/race";
-
 import { raceService } from "@/lib/race.service";
+import { useAuthStore } from "@/store/authStore";
+import type { Race } from "@/types/race";
+import { Alert } from "react-native";
 import { create } from "zustand";
 
 interface RaceState {
@@ -8,12 +9,16 @@ interface RaceState {
   isLoading: boolean;
   error: string | null;
 
+  // ✅ Déclarations pour TypeScript
+  _getAuthToken: () => string | null;
+  _handleUnauthorized: () => void;
+
   // Actions
-  fetchRaces: (token: string) => Promise<void>;
-  addRace: (token: string, raceData: Omit<Race, "id">) => Promise<boolean>;
+  fetchRaces: () => Promise<void>;
+  addRace: (raceData: Omit<Race, "id">) => Promise<boolean>;
+  removeRace: (id: string | number) => Promise<boolean>;
+  archiveRace: (id: string | number) => Promise<boolean>;
   resetRaces: () => void;
-  removeRace: (token: string, id: string | number) => Promise<boolean>;
-  archiveRace: (token: string, id: string | number) => Promise<boolean>;
 }
 
 export const useRaceStore = create<RaceState>((set, get) => ({
@@ -21,85 +26,97 @@ export const useRaceStore = create<RaceState>((set, get) => ({
   isLoading: false,
   error: null,
 
-  // Récupérer toutes les courses
-  fetchRaces: async (token: string) => {
+  // Récupère le token actuel
+  _getAuthToken: () => useAuthStore.getState().token,
+
+  // ✅ Logique de redirection en cas de 401
+  _handleUnauthorized: () => {
+    Alert.alert(
+      "Session expirée",
+      "Votre session a expiré. Veuillez vous reconnecter."
+    );
+
+    // On vide le token dans l'authStore (ce qui déclenche la redirection)
+    // On utilise setState au cas où la fonction logout n'est pas définie
+    useAuthStore.setState({ token: null, user: null });
+
+    // On nettoie aussi les courses locales
+    get().resetRaces();
+  },
+
+  fetchRaces: async () => {
+    const token = get()._getAuthToken();
+    if (!token) return;
+
     set({ isLoading: true, error: null });
     try {
       const response = await raceService.getAllRaces(token);
-
-      // 🕵️ Debug: Regarde ce qui s'affiche dans ton terminal Metro
-      console.log("Réponse API brute:", JSON.stringify(response, null, 2));
-
-      // API Platform met les résultats dans hydra:member
-      const data =
-        response["member"] ||
-        response["hydra:member"] ||
-        (Array.isArray(response) ? response : []);
-
+      const data = response["member"] || response["hydra:member"] || [];
       set({ races: data, isLoading: false });
     } catch (err: any) {
-      console.error("Erreur fetchRaces:", err);
-      set({ error: "Erreur lors de la récupération", isLoading: false });
+      if (err.response?.status === 401) {
+        get()._handleUnauthorized();
+      } else {
+        set({ error: "Erreur de récupération", isLoading: false });
+      }
     }
   },
 
-  // Ajouter une course
-  addRace: async (token: string, raceData: Omit<Race, "id">) => {
-    set({ isLoading: true, error: null });
+  addRace: async (raceData) => {
+    const token = get()._getAuthToken();
+    if (!token) return false;
+
+    set({ isLoading: true });
     try {
       await raceService.createRace(token, raceData);
-
-      // Après l'ajout, on rafraîchit la liste pour être synchro avec la DB
-      await get().fetchRaces(token);
-
-      set({ isLoading: false });
+      await get().fetchRaces();
       return true;
     } catch (err: any) {
-      console.error("Erreur API Race:", err);
-      set({ error: "Impossible de créer la course", isLoading: false });
+      if (err.response?.status === 401) {
+        get()._handleUnauthorized();
+      }
+      set({ isLoading: false });
       return false;
     }
   },
 
-  // Nettoyer le store (utile lors de la déconnexion)
-  resetRaces: () => set({ races: [], error: null, isLoading: false }),
+  removeRace: async (id) => {
+    const token = get()._getAuthToken();
+    if (!token) return false;
 
-  removeRace: async (token: string, id: string | number) => {
     set({ isLoading: true });
     try {
       await raceService.deleteRace(token, id);
-
-      // Mise à jour locale : on filtre le tableau pour enlever la course supprimée
-      // sans avoir besoin de refaire un fetch complet
-      const currentRaces = get().races;
       set({
-        races: currentRaces.filter((race) => race.id !== id),
+        races: get().races.filter((race) => race.id !== id),
         isLoading: false,
       });
       return true;
     } catch (err: any) {
-      console.error("Erreur suppression:", err);
+      if (err.response?.status === 401) get()._handleUnauthorized();
       set({ isLoading: false });
       return false;
     }
   },
-  archiveRace: async (token: string, id: string | number) => {
+
+  archiveRace: async (id) => {
+    const token = get()._getAuthToken();
+    if (!token) return false;
+
     set({ isLoading: true });
     try {
-      // On envoie archive: true à la base de données
       await raceService.updateRace(token, id, { archive: true });
-
-      // On retire la course de la liste affichée (puisque ce sont les courses "à venir")
-      const currentRaces = get().races;
       set({
-        races: currentRaces.filter((race) => race.id !== id),
+        races: get().races.filter((race) => race.id !== id),
         isLoading: false,
       });
       return true;
     } catch (err: any) {
-      console.error("Erreur archivage:", err);
+      if (err.response?.status === 401) get()._handleUnauthorized();
       set({ isLoading: false });
       return false;
     }
   },
+
+  resetRaces: () => set({ races: [], error: null, isLoading: false }),
 }));
