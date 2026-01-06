@@ -4,24 +4,14 @@ import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import React, { useState } from "react";
-import { Platform } from "react-native";
+import { Platform, TouchableOpacity, View } from "react-native";
 
 export const DatePickerField = ({ label, value, onChange }: any) => {
   const [show, setShow] = useState(false);
 
   const onDateChange = (event: any, selectedDate?: Date) => {
-    // Sur Android, on ferme après la sélection
+    // Sur Android, on ferme après sélection
     if (Platform.OS === "android") {
-      setShow(false);
-    }
-
-    // Sur iOS, si l'utilisateur a fini de cliquer (type "set"), on ferme
-    if (Platform.OS === "ios" && event.type === "set") {
-      setShow(false);
-    }
-
-    // Si on clique sur "Annuler" (dismissed), on ferme aussi
-    if (event.type === "dismissed") {
       setShow(false);
     }
 
@@ -31,7 +21,6 @@ export const DatePickerField = ({ label, value, onChange }: any) => {
   };
 
   const formatDate = (date: any) => {
-    // Si la date est valide, on l'affiche, sinon on affiche "Sélectionner..."
     if (date instanceof Date && !isNaN(date.getTime())) {
       return date.toLocaleDateString("fr-FR");
     }
@@ -44,37 +33,42 @@ export const DatePickerField = ({ label, value, onChange }: any) => {
         {label}
       </Text>
 
-      <Input>
-        <InputField
-          value={formatDate(value)}
-          // On déclenche l'ouverture au focus ou au clic
-          onFocus={() => setShow(true)}
-          // Très important : empêche le clavier système de monter
-          showSoftInputOnFocus={false}
-          placeholder="Sélectionner une date"
-        />
-      </Input>
+      {/* On utilise TouchableOpacity pour que toute la zone soit cliquable proprement */}
+      <TouchableOpacity activeOpacity={0.7} onPress={() => setShow(!show)}>
+        <View pointerEvents="none">
+          {/* pointerEvents="none" permet au clic de traverser l'input vers le TouchableOpacity */}
+          <Input>
+            <InputField
+              value={formatDate(value)}
+              placeholder="Sélectionner une date"
+              editable={false} // Empêche l'édition manuelle et le clavier
+            />
+          </Input>
+        </View>
+      </TouchableOpacity>
 
       {show && (
-        <DateTimePicker
-          value={value instanceof Date ? value : new Date()}
-          mode="date"
-          // 'default' est plus compact sur iOS 14+
-          display={Platform.OS === "ios" ? "default" : "default"}
-          onChange={onDateChange}
-          minimumDate={new Date()}
-        />
-      )}
+        <VStack className="bg-background-50 rounded-lg mt-2 overflow-hidden border border-outline-100">
+          <DateTimePicker
+            value={value instanceof Date ? value : new Date()}
+            mode="date"
+            // Le mode 'spinner' évite le "bouton dans le bouton" sur iOS
+            display={Platform.OS === "ios" ? "spinner" : "default"}
+            onChange={onDateChange}
+            minimumDate={new Date()}
+            locale="fr-FR"
+          />
 
-      {/* Bouton de secours pour iOS si le calendrier reste bloqué ouvert */}
-      {show && Platform.OS === "ios" && (
-        <Button
-          variant="link"
-          onPress={() => setShow(false)}
-          className="justify-end py-0"
-        >
-          <ButtonText size="sm">Fermer</ButtonText>
-        </Button>
+          {Platform.OS === "ios" && (
+            <Button
+              variant="link"
+              onPress={() => setShow(false)}
+              className="h-10 border-t border-outline-50"
+            >
+              <ButtonText size="sm">Confirmer la date</ButtonText>
+            </Button>
+          )}
+        </VStack>
       )}
     </VStack>
   );
