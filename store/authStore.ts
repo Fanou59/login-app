@@ -27,6 +27,7 @@ interface AuthState {
   ) => Promise<boolean>;
   deleteAccount: () => Promise<boolean>;
   setUser: (user: User | null) => void;
+  loginWithToken: (token: string, user: User) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -80,7 +81,15 @@ export const useAuthStore = create<AuthState>()(
           return false;
         }
       },
-
+      loginWithToken: (token: string, userData: User) => {
+        set({
+          token: token,
+          user: userData,
+          error: null,
+          isLoading: false,
+        });
+        console.log("Store mis à jour avec le token Google");
+      },
       // Action de refresh du token
       refreshAccessToken: async () => {
         const { refreshToken } = get();
@@ -100,6 +109,7 @@ export const useAuthStore = create<AuthState>()(
             name: decodedToken?.username?.split("@")[0] || "Utilisateur",
             email: decodedToken?.username,
             username: decodedToken?.username,
+            firstname: decodedToken?.firstname,
           };
 
           set({

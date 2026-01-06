@@ -28,6 +28,7 @@ interface AuthContextType {
   deleteAccount: () => Promise<boolean>;
   refreshUserProfile: () => Promise<void>;
   updateUserData: (newUserData: any) => void;
+  loginWithToken: (token: string, userData: any) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -46,6 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     registration: storeRegistration,
     deleteAccount: storeDeleteAccount,
     setUser,
+    loginWithToken: storeLoginWithToken,
   } = useAuthStore();
 
   // Vérifier l'auth au démarrage
@@ -100,6 +102,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     [setUser]
   );
+  const loginWithToken = async (token: string, userData: any) => {
+    // On appelle la fonction du store qui va mettre à jour l'état et le stockage
+    storeLoginWithToken(token, userData);
+  };
 
   const isAuthenticated = !!user && !!token;
 
@@ -119,6 +125,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         deleteAccount,
         refreshUserProfile,
         updateUserData,
+        loginWithToken,
       }}
     >
       {children}

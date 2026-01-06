@@ -1,3 +1,4 @@
+import { Header } from "@/components/features/Header";
 import { PasswordField } from "@/components/features/PasswordField";
 import { TextField } from "@/components/features/TextField";
 import { Button, ButtonText } from "@/components/ui/button";
@@ -5,155 +6,116 @@ import { Heading } from "@/components/ui/heading";
 import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
-import { useAuth } from "@/contexts/AuthContext";
-import { useProfileFormStore } from "@/store/profilStore";
-import { router } from "expo-router";
-import { useEffect } from "react";
-import { Alert, Image, View } from "react-native";
+import { useSignUp } from "@/hooks/useSignUp";
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  View,
+} from "react-native";
 
 export default function SignUp() {
-  const {
-    firstname,
-    email,
-    newPassword,
-    confirmPassword,
-    errors,
-    setFirstname,
-    setEmail,
-    setNewPassword,
-    setConfirmPassword,
-    validateForm,
-    resetForm,
-  } = useProfileFormStore();
+  const { form, handleRegistration, goToSignIn, isLoading, isInitialized } =
+    useSignUp();
 
-  const { isLoading, error, clearError, isInitialized, registration } =
-    useAuth();
-
-  // Reset du formulaire au montage du composant
-  useEffect(() => {
-    resetForm();
-  }, [resetForm]);
-
-  // Effacer les erreurs quand l'utilisateur tape
-  useEffect(() => {
-    if (error) {
-      clearError();
-    }
-  }, [email, newPassword, error, clearError]);
-
-  const handleLogin = () => {
-    router.replace("/signIn");
-  };
-
-  const handleRegistration = async () => {
-    if (!validateForm()) {
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      Alert.alert("Erreur", "Les mots de passe ne correspondent pas.");
-      return;
-    }
-
-    const success = await registration(
-      email.trim(),
-      newPassword,
-      firstname.trim()
-    );
-
-    if (success) {
-      console.log("utilisateur enregistré");
-      resetForm();
-      Alert.alert("Succés", "Votre compte est créé", [
-        { text: "OK", onPress: () => router.replace("/") },
-      ]);
-    } else {
-      Alert.alert("Erreur", error || "Erreur lors de la création de compte");
-    }
-  };
-
-  // 👈 Ajouter cet écran de chargement
   if (!isInitialized) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text>Initialisation...</Text>
+      <View className="flex-1 justify-center items-center bg-background-0">
+        <ActivityIndicator size="large" />
+        <Text className="mt-2 text-typography-500">Initialisation...</Text>
       </View>
     );
   }
 
   return (
-    <VStack className="flex-1">
-      <VStack className="items-center pt-16 pb-8">
-        <Image
-          source={require("@/assets/images/trail-ready-logo.png")}
-          style={{
-            width: 120,
-            height: 120,
-            resizeMode: "contain",
-          }}
-        />
-      </VStack>
-      <VStack className="flex-1 justify-start pt-4 px-8" space="md">
-        <VStack space="xs">
-          <Heading size="3xl">Créer un compte</Heading>
-          <Text size="sm">Démarrer votre expérience Trail Ready</Text>
-        </VStack>
-        <VStack
-          className="w-full rounded-md border border-background-200 p-4"
-          space="md"
-        >
-          <TextField
-            label="E-mail"
-            placeholder="john.doe@gmail.com"
-            value={email}
-            error={errors.email}
-            onChangeText={setEmail}
-            accessibilityLabel="Champ email"
-            accessibilityHint="Entrez votre email"
-          />
-          <TextField
-            label="Prénom"
-            placeholder="Votre prénom"
-            value={firstname}
-            onChangeText={setFirstname}
-            error={errors.firstname}
-            accessibilityLabel="Champ prenom"
-            accessibilityHint="Entrez votre prenom"
-          />
-          <PasswordField
-            label="Mot de passe"
-            placeholder="Mot de passe"
-            error={errors.newPassword}
-            value={newPassword}
-            onChangeText={setNewPassword}
-          />
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      className="flex-1 bg-background-0"
+    >
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        bounces={false}
+        showsVerticalScrollIndicator={false}
+      >
+        <VStack className="flex-1">
+          <Header />
 
-          <PasswordField
-            label="Confirmez votre mot de passe"
-            placeholder="Mot de passe"
-            error={errors.confirmPassword}
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-          />
-          <Button
-            className={`w-full mt-6 ${isLoading ? "opacity-50" : ""}`}
-            size="md"
-            onPress={handleRegistration}
-            disabled={isLoading}
-          >
-            <ButtonText>Enregistrer</ButtonText>
-          </Button>
-          <HStack className="justify-center items-center mt-4" space="xs">
-            <Text size="sm">Vous avez déjà un compte ?</Text>
-            <Text
-              size="sm"
-              className="text-blue-500 underline"
-              onPress={handleLogin}
+          {/* Container centré verticalement */}
+          <VStack className="flex-1 justify-center px-8 pb-12" space="xl">
+            {/* Titre de la page */}
+            <VStack space="xs" className="mb-2">
+              <Heading size="3xl" className="text-typography-900">
+                Créer un compte
+              </Heading>
+              <Text size="md" className="text-typography-500">
+                Démarrez votre expérience Trail Ready
+              </Text>
+            </VStack>
+
+            {/* Carte du formulaire d'inscription */}
+            <VStack
+              className="w-full rounded-2xl border border-outline-100 p-6 bg-background-50 shadow-sm"
+              space="lg"
             >
-              Se connecter
-            </Text>
-          </HStack>
+              <VStack space="md">
+                <TextField
+                  label="E-mail"
+                  placeholder="john.doe@gmail.com"
+                  value={form.email}
+                  error={form.errors.email}
+                  onChangeText={form.setEmail}
+                />
+                <TextField
+                  label="Prénom"
+                  placeholder="Votre prénom"
+                  value={form.firstname}
+                  onChangeText={form.setFirstname}
+                  error={form.errors.firstname}
+                />
+                <PasswordField
+                  label="Mot de passe"
+                  placeholder="Mot de passe"
+                  error={form.errors.newPassword}
+                  value={form.newPassword}
+                  onChangeText={form.setNewPassword}
+                />
+                <PasswordField
+                  label="Confirmez votre mot de passe"
+                  placeholder="Répétez le mot de passe"
+                  error={form.errors.confirmPassword}
+                  value={form.confirmPassword}
+                  onChangeText={form.setConfirmPassword}
+                />
+              </VStack>
+
+              <VStack space="md" className="w-full mt-2">
+                <Button
+                  className={`w-full h-12 ${isLoading ? "opacity-50" : ""}`}
+                  size="md"
+                  onPress={handleRegistration}
+                  disabled={isLoading}
+                >
+                  <ButtonText>Enregistrer</ButtonText>
+                </Button>
+
+                <HStack className="justify-center items-center mt-2" space="xs">
+                  <Text size="sm" className="text-typography-500">
+                    Vous avez déjà un compte ?
+                  </Text>
+                  <Text
+                    size="sm"
+                    className="text-primary-500 font-semibold underline"
+                    onPress={goToSignIn}
+                  >
+                    Se connecter
+                  </Text>
+                </HStack>
+              </VStack>
+            </VStack>
+          </VStack>
         </VStack>
-      </VStack>
-    </VStack>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

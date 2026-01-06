@@ -8,11 +8,7 @@ interface UserProfileProps {
 export const UserProfile = ({ user }: UserProfileProps) => {
   return (
     <>
-      <Text size="xl">Bienvenue !</Text>
-      <Text size="lg">
-        Bonjour {user.firstname}
-        {user.lastname ? ` ${user.lastname}` : ""}
-      </Text>
+      <Text size="lg">Bonjour {user.firstname} !</Text>
     </>
   );
 };
