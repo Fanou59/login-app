@@ -1,4 +1,4 @@
-import { authAPI } from "@/lib/endpoints";
+import { authAPI } from "@/lib/auth.service";
 import { decodeJWT } from "@/lib/jwt";
 import type { User } from "@/types/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";

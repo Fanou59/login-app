@@ -1,4 +1,4 @@
-import { authAPI } from "@/lib/endpoints";
+import { authAPI } from "@/lib/auth.service";
 import { create } from "zustand";
 
 interface ProfileFormState {

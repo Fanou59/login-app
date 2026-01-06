@@ -1,17 +1,80 @@
+import { useAuthStore } from "@/store/authStore";
+import { useRaceStore } from "@/store/raceStore";
+import React, { useEffect, useState } from "react";
+import { Alert, FlatList, View } from "react-native";
+
+// Tes imports features & UI
 import { DatePickerField } from "@/components/features/DatePicker";
 import { Header } from "@/components/features/Header";
 import { SimpleCard } from "@/components/features/SimpleCard";
 import { TextField } from "@/components/features/TextField";
 import { UserProfile } from "@/components/features/UserProfile";
 import { Button, ButtonText } from "@/components/ui/button";
-
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import { useUserScreen } from "@/hooks/useWelcomeScreen";
-import { View } from "react-native";
 
 export default function HomeScreen() {
   const { user } = useUserScreen();
+  const { token } = useAuthStore();
+
+  // --- ÉTATS ---
+  const [isFormVisible, setIsFormVisible] = useState(false);
+  const [raceName, setRaceName] = useState("");
+  const [raceDate, setRaceDate] = useState(new Date());
+
+  const { races, fetchRaces, addRace, removeRace, archiveRace, isLoading } =
+    useRaceStore();
+
+  useEffect(() => {
+    if (token) fetchRaces(token);
+  }, [token, fetchRaces]);
+
+  // --- ACTIONS ---
+  const handleCreateRace = async () => {
+    if (!raceName.trim()) {
+      Alert.alert("Erreur", "Le nom de la course est requis");
+      return;
+    }
+
+    const success = await addRace(token!, {
+      name: raceName,
+      date: raceDate.toISOString(),
+      archive: false,
+    });
+
+    if (success) {
+      setRaceName("");
+      setRaceDate(new Date());
+      setIsFormVisible(false); // ✅ Le formulaire disparaît après succès
+      Alert.alert("Succès", "La course a été créée !");
+    }
+  };
+  const handleDelete = (id: string | number, name: string) => {
+    Alert.alert(
+      "Suppression",
+      `Voulez-vous vraiment supprimer la course "${name}" ?`,
+      [
+        { text: "Annuler", style: "cancel" },
+        {
+          text: "Supprimer",
+          style: "destructive",
+          onPress: async () => {
+            const success = await removeRace(token!, id);
+            if (!success) {
+              Alert.alert("Erreur", "Impossible de supprimer la course.");
+            }
+          },
+        },
+      ]
+    );
+  };
+  const handleArchive = async (id: string | number) => {
+    const success = await archiveRace(token!, id);
+    if (!success) {
+      Alert.alert("Erreur", "Impossible d'archiver la course.");
+    }
+  };
 
   if (!user) {
     return (
@@ -22,55 +85,108 @@ export default function HomeScreen() {
   }
 
   return (
-    <VStack className="flex-1">
+    <VStack className="flex-1 bg-white">
       <Header />
 
-      <VStack className="p-6">
-        <VStack space="md" reversed={false}>
-          <UserProfile user={user} />
-        </VStack>
+      <VStack className="p-6 pb-2">
+        <UserProfile user={user} />
 
-        <VStack space="md" className="w-full mt-2">
-          <TextField
-            label="Nom de la course"
-            placeholder="Trail des fraises"
-            value="Trail des fraises"
-            onChangeText={() => {}}
-          />
-          <DatePickerField
-            label="Date de la course"
-            value={new Date()}
-            onChange={() => {}}
-          />
-        </VStack>
-        <VStack space="md" className="w-full mt-4">
-          <Button className="w-full h-12" size="md">
-            <ButtonText>Ajouter une course</ButtonText>
+        {/* --- BOUTON D'OUVERTURE OU FORMULAIRE --- */}
+        {!isFormVisible ? (
+          <Button className="mt-4 h-12" onPress={() => setIsFormVisible(true)}>
+            <ButtonText>Nouvelle course</ButtonText>
           </Button>
-        </VStack>
+        ) : (
+          <VStack
+            space="md"
+            className="w-full mt-4 p-4 border border-background-100 rounded-lg bg-background-50"
+          >
+            <Text className="font-bold text-lg">Ajouter une course</Text>
+
+            <TextField
+              label="Nom de la course"
+              placeholder="Ex: Trail des fraises..."
+              value={raceName}
+              onChangeText={setRaceName}
+            />
+
+            <DatePickerField
+              label="Date de la course"
+              value={raceDate}
+              onChange={setRaceDate}
+            />
+
+            <VStack space="sm" className="mt-2">
+              <Button
+                action="primary"
+                onPress={handleCreateRace}
+                disabled={isLoading}
+              >
+                <ButtonText>
+                  {isLoading ? "Enregistrement..." : "Valider l'ajout"}
+                </ButtonText>
+              </Button>
+
+              <Button
+                variant="outline"
+                action="secondary"
+                onPress={() => setIsFormVisible(false)}
+                disabled={isLoading}
+              >
+                <ButtonText>Annuler</ButtonText>
+              </Button>
+            </VStack>
+          </VStack>
+        )}
       </VStack>
-      <VStack className="p-6">
-        <SimpleCard>
-          <VStack space="sm">
-            <Text
-              size="md"
-              className="text-typography-600 font-medium text-center"
-            >
-              Trail des fraises
-            </Text>
-            <Text size="sm" className="text-typography-400">
-              Course prévu le 06/01/2026
-            </Text>
-          </VStack>
-          <VStack className="flex flex-row justify-end mt-3" space="sm">
-            <Button action="secondary">
-              <ButtonText>Archiver</ButtonText>
-            </Button>
-            <Button action="negative">
-              <ButtonText>Supprimer</ButtonText>
-            </Button>
-          </VStack>
-        </SimpleCard>
+
+      {/* --- LISTE DES COURSES --- */}
+      <VStack className="flex-1 p-6">
+        <Text className="font-bold text-xl mb-4">Mes courses à venir</Text>
+
+        <FlatList
+          data={races}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <SimpleCard className="mb-4">
+              <VStack space="sm">
+                <Text size="md" className="text-typography-900 font-bold">
+                  {item.name}
+                </Text>
+                <Text size="sm" className="text-typography-500">
+                  Prévue le {new Date(item.date).toLocaleDateString("fr-FR")}
+                </Text>
+              </VStack>
+              <VStack className="flex flex-row justify-end mt-3" space="sm">
+                <Button
+                  action="secondary"
+                  variant="outline"
+                  size="xs"
+                  onPress={() => handleArchive(item.id)} // 👈 On branche ici
+                  disabled={isLoading}
+                >
+                  <ButtonText>Archiver</ButtonText>
+                </Button>
+                <Button
+                  action="negative"
+                  variant="outline"
+                  size="xs"
+                  onPress={() => handleDelete(item.id, item.name)}
+                  disabled={isLoading}
+                >
+                  <ButtonText>Supprimer</ButtonText>
+                </Button>
+              </VStack>
+            </SimpleCard>
+          )}
+          ListEmptyComponent={
+            <View className="items-center mt-10">
+              <Text className="text-typography-400">
+                Aucune course enregistrée.
+              </Text>
+            </View>
+          }
+        />
       </VStack>
     </VStack>
   );

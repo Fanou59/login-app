@@ -8,8 +8,8 @@ export function Header() {
       <Image
         source={require("@/assets/images/trail-ready-logo.png")}
         style={{
-          width: 120,
-          height: 120,
+          width: 60,
+          height: 60,
           resizeMode: "contain",
         }}
       />

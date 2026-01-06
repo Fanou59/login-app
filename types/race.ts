@@ -1,5 +1,6 @@
 export interface Race {
   id: string;
   name: string;
-  date: Date;
+  date: string;
+  archive: boolean;
 }

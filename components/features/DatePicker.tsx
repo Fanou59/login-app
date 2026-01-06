@@ -10,8 +10,18 @@ export const DatePickerField = ({ label, value, onChange }: any) => {
   const [show, setShow] = useState(false);
 
   const onDateChange = (event: any, selectedDate?: Date) => {
-    // Sur Android, on ferme le picker immédiatement après sélection
+    // Sur Android, on ferme après la sélection
     if (Platform.OS === "android") {
+      setShow(false);
+    }
+
+    // Sur iOS, si l'utilisateur a fini de cliquer (type "set"), on ferme
+    if (Platform.OS === "ios" && event.type === "set") {
+      setShow(false);
+    }
+
+    // Si on clique sur "Annuler" (dismissed), on ferme aussi
+    if (event.type === "dismissed") {
       setShow(false);
     }
 
@@ -20,8 +30,12 @@ export const DatePickerField = ({ label, value, onChange }: any) => {
     }
   };
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString("fr-FR");
+  const formatDate = (date: any) => {
+    // Si la date est valide, on l'affiche, sinon on affiche "Sélectionner..."
+    if (date instanceof Date && !isNaN(date.getTime())) {
+      return date.toLocaleDateString("fr-FR");
+    }
+    return "";
   };
 
   return (
@@ -30,31 +44,36 @@ export const DatePickerField = ({ label, value, onChange }: any) => {
         {label}
       </Text>
 
-      {/* On utilise un Input Gluestack détourné pour afficher la date */}
       <Input>
         <InputField
           value={formatDate(value)}
+          // On déclenche l'ouverture au focus ou au clic
           onFocus={() => setShow(true)}
-          showSoftInputOnFocus={false} // Empêche le clavier de monter
+          // Très important : empêche le clavier système de monter
+          showSoftInputOnFocus={false}
           placeholder="Sélectionner une date"
         />
       </Input>
 
       {show && (
         <DateTimePicker
-          value={value}
+          value={value instanceof Date ? value : new Date()}
           mode="date"
-          display={Platform.OS === "ios" ? "spinner" : "default"}
+          // 'default' est plus compact sur iOS 14+
+          display={Platform.OS === "ios" ? "default" : "default"}
           onChange={onDateChange}
-          maximumDate={new Date()} // Optionnel: empêche de choisir dans le futur
+          minimumDate={new Date()}
         />
       )}
 
-      {/* Sur iOS, il est souvent mieux d'ajouter un bouton "Valider" 
-          si tu utilises le mode spinner */}
+      {/* Bouton de secours pour iOS si le calendrier reste bloqué ouvert */}
       {show && Platform.OS === "ios" && (
-        <Button variant="link" onPress={() => setShow(false)}>
-          <ButtonText>Confirmer</ButtonText>
+        <Button
+          variant="link"
+          onPress={() => setShow(false)}
+          className="justify-end py-0"
+        >
+          <ButtonText size="sm">Fermer</ButtonText>
         </Button>
       )}
     </VStack>
