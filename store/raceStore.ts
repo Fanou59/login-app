@@ -18,6 +18,7 @@ interface RaceState {
   addRace: (raceData: Omit<Race, "id">) => Promise<boolean>;
   removeRace: (id: string | number) => Promise<boolean>;
   archiveRace: (id: string | number) => Promise<boolean>;
+  unarchiveRace: (id: string | number) => Promise<boolean>;
   resetRaces: () => void;
 }
 
@@ -99,15 +100,40 @@ export const useRaceStore = create<RaceState>((set, get) => ({
     }
   },
 
-  archiveRace: async (id) => {
+  archiveRace: async (id: string | number) => {
+    const token = get()._getAuthToken();
+    if (!token) return false;
+    set({ isLoading: true });
+    try {
+      // 1. Appel API (PATCH)
+      await raceService.updateRace(token, id, { archive: true });
+
+      // 2. Mise à jour LOCALE immédiate
+      set((state) => ({
+        races: state.races.map((r) =>
+          r.id === id ? { ...r, archive: true } : r
+        ),
+        isLoading: false,
+      }));
+      return true;
+    } catch (err: any) {
+      if (err.response?.status === 401) get()._handleUnauthorized();
+      set({ isLoading: false });
+      return false;
+    }
+  },
+  unarchiveRace: async (id: string | number) => {
     const token = get()._getAuthToken();
     if (!token) return false;
 
     set({ isLoading: true });
     try {
-      await raceService.updateRace(token, id, { archive: true });
+      await raceService.updateRace(token, id, { archive: false });
+      // On met à jour localement l'état de la course dans le tableau races
       set({
-        races: get().races.filter((race) => race.id !== id),
+        races: get().races.map((race) =>
+          race.id === id ? { ...race, archive: false } : race
+        ),
         isLoading: false,
       });
       return true;
